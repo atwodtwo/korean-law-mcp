@@ -16,21 +16,15 @@ import { VERSION } from "./version.js"
 const LAW_OC = process.env.LAW_OC || ""
 const apiClient = new LawApiClient({ apiKey: LAW_OC })
 
-// MCP 서버 생성
-const server = new Server(
-  {
-    name: "korean-law",
-    version: VERSION,
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
-  }
-)
-
-// 도구 등록
-registerTools(server, apiClient)
+// MCP 서버 팩토리 (HTTP 모드: 세션마다 새 인스턴스 필요)
+function createServer(): Server {
+  const s = new Server(
+    { name: "korean-law", version: VERSION },
+    { capabilities: { tools: {} } }
+  )
+  registerTools(s, apiClient)
+  return s
+}
 
 // 서버 시작
 async function main() {
@@ -41,9 +35,10 @@ async function main() {
   const port = portIndex !== -1 ? parseInt(args[portIndex + 1], 10) : 8000
 
   if (mode === "http" || mode === "sse") {
-    await startHTTPServer(server, port)
+    await startHTTPServer(createServer, port)
   } else {
     // STDIO 모드 (기본)
+    const server = createServer()
     const transport = new StdioServerTransport()
     await server.connect(transport)
   }

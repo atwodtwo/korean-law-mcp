@@ -11,16 +11,17 @@ import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js"
 import { sessionStore, setSessionApiKey, deleteSession } from "../lib/session-state.js"
 import { VERSION } from "../version.js"
 
-// 세션 정보 (Transport + 마지막 접근 시간)
+// 세션 정보 (Transport + Server + 마지막 접근 시간)
 interface SessionInfo {
   transport: StreamableHTTPServerTransport
+  server: Server
   lastAccess: number
 }
 
 // 세션 맵
 const sessions = new Map<string, SessionInfo>()
 
-export async function startHTTPServer(server: Server, port: number) {
+export async function startHTTPServer(createServer: () => Server, port: number) {
   const app = express()
   app.use(express.json({ limit: "100kb" }))
 
@@ -33,6 +34,7 @@ export async function startHTTPServer(server: Server, port: number) {
         console.error(`[Session Cleanup] Removing idle session: ${sessionId}`)
         try {
           session.transport.close()
+          session.server.close().catch(() => {})
         } catch { /* ignore */ }
         sessions.delete(sessionId)
         deleteSession(sessionId)
@@ -164,6 +166,7 @@ export async function startHTTPServer(server: Server, port: number) {
         console.error(`[POST /mcp] New initialization request`)
 
         const eventStore = new InMemoryEventStore()
+        const sessionServer = createServer()
         transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
           enableJsonResponse: true,
@@ -172,6 +175,7 @@ export async function startHTTPServer(server: Server, port: number) {
             console.error(`[POST /mcp] Session initialized: ${sid}`)
             sessions.set(sid, {
               transport,
+              server: sessionServer,
               lastAccess: Date.now()
             })
             if (apiKeyFromHeader) {
@@ -190,8 +194,8 @@ export async function startHTTPServer(server: Server, port: number) {
           }
         }
 
-        // MCP 서버에 연결
-        await server.connect(transport)
+        // 세션별 MCP 서버에 연결
+        await sessionServer.connect(transport)
         await transport.handleRequest(req, res, req.body)
         return
       } else {
@@ -294,6 +298,7 @@ export async function startHTTPServer(server: Server, port: number) {
     for (const [sessionId, session] of sessions) {
       try {
         await session.transport.close()
+        await session.server.close()
         sessions.delete(sessionId)
         deleteSession(sessionId)
       } catch (error) {
@@ -302,7 +307,6 @@ export async function startHTTPServer(server: Server, port: number) {
     }
 
     expressServer.close()
-    await server.close()
     console.error("Server shutdown complete")
     process.exit(0)
   }
