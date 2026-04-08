@@ -14,7 +14,7 @@
 
 ---
 
-## v3.0.0 — Unified Architecture
+## v3.0.2 — Unified Architecture + Setup Wizard
 
 법제처 41개 API를 89개 MCP 도구로 구조화했던 v2.
 v3는 같은 41개 API를 **14개 도구**로 재압축했습니다.

@@ -15,7 +15,7 @@
 
 ---
 
-## What's New in v3.0.0 — Unified Architecture
+## What's New in v3.0.2 — Unified Architecture + Setup Wizard
 
 v2 structured 39 legal APIs into 89 MCP tools. v3 re-compresses them into **14 tools**.
 
