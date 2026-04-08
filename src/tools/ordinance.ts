@@ -67,11 +67,14 @@ export async function getOrdinance(
     if (articles.length > 0) {
       // jo 파라미터가 있으면 해당 조문만 필터링
       if (input.jo) {
-        // "제20조" → "제20조" 접두사 매칭 (조제목이 "제20조(목적)" 형태)
+        // "제20조" → "제20조(목적)" 매칭, "제20조의2" 는 제외
         const joNorm = input.jo.replace(/\s+/g, "")
         const matched = articles.filter(a => {
           const title = (a.조제목 || "").replace(/\s+/g, "")
-          return title.startsWith(joNorm) || title.startsWith(joNorm.replace(/조$/, "조(")) || title === joNorm
+          if (!title.startsWith(joNorm)) return false
+          // "제20조" 뒤에 "의" 가 오면 다른 조문 (제20조의2 등)
+          const rest = title.slice(joNorm.length)
+          return rest === "" || rest.startsWith("(") || rest.startsWith(" ")
         })
 
         if (matched.length === 0) {
