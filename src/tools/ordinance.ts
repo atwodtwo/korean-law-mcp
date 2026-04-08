@@ -5,7 +5,7 @@
 import { z } from "zod"
 import type { LawApiClient } from "../lib/api-client.js"
 import { cleanHtml } from "../lib/article-parser.js"
-import { buildOrdinanceJO } from "../lib/law-parser.js"
+import { buildJO } from "../lib/law-parser.js"
 import { truncateResponse } from "../lib/schemas.js"
 import { formatToolError } from "../lib/errors.js"
 
@@ -26,7 +26,7 @@ export async function getOrdinance(
     let joCode: string | undefined
     if (input.jo) {
       try {
-        joCode = /제\d+조/.test(input.jo) ? buildOrdinanceJO(input.jo) : input.jo
+        joCode = /제\d+조/.test(input.jo) ? buildJO(input.jo) : input.jo
       } catch {
         // JO 코드 변환 실패 시 클라이언트 필터링만 사용
       }
@@ -67,14 +67,10 @@ export async function getOrdinance(
     if (articles.length > 0) {
       // jo 파라미터가 있으면 해당 조문만 필터링
       if (input.jo) {
-        // "제20조" → "제20조(목적)" 매칭, "제20조의2" 는 제외
-        const joNorm = input.jo.replace(/\s+/g, "")
         const matched = articles.filter(a => {
-          const title = (a.조제목 || "").replace(/\s+/g, "")
-          if (!title.startsWith(joNorm)) return false
-          // "제20조" 뒤에 "의" 가 오면 다른 조문 (제20조의2 등)
-          const rest = title.slice(joNorm.length)
-          return rest === "" || rest.startsWith("(")
+          // 조문번호 배열 또는 문자열 — JO 코드와 비교
+          const nums = Array.isArray(a.조문번호) ? a.조문번호 : [a.조문번호]
+          return joCode ? nums.some((n: string) => n === joCode) : false
         })
 
         if (matched.length === 0) {
