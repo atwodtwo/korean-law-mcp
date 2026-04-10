@@ -1,6 +1,6 @@
 # Korean Law MCP - API Reference
 
-> **v3.0.1** | 14개 노출 도구 (내부 91개, 77개는 execute_tool로 접근)
+> **v3.1.2** | 14개 노출 도구 (내부 91개, 77개는 execute_tool로 접근)
 
 도구 구조는 [README.md](../README.md#도구-구조-14개) 참조.
 상세 파라미터는 각 도구의 Zod 스키마(`src/tools/*.ts`) 참조.
@@ -44,6 +44,21 @@
   "isError": true
 }
 ```
+
+### 검색 결과 없음 힌트
+
+검색 도구가 0건을 반환하면 `buildNoResultHint()`가 자동으로 힌트를 생성합니다:
+
+```json
+{
+  "content": [{ "type": "text", "text": "검색 결과가 없습니다.\n\n힌트:\n  - 키워드를 줄여보세요: search_law(query=\"민법\")\n  - 다른 도메인: search_ordinance(query=\"민법 손해배상\")" }],
+  "isError": true
+}
+```
+
+힌트 내용:
+- **키워드 축소**: 복수 키워드 검색 시 첫 번째 키워드만으로 재검색 제안
+- **대안 도구**: 도구별로 관련 도메인의 다른 검색 도구 안내
 
 ### 캐싱
 
@@ -142,7 +157,7 @@
 | `get_term_articles` | 용어→조문 연계 |
 | `get_related_laws` | 관련법령 조회 |
 
-### 기타 (6개)
+### 기타 (7개)
 
 | 도구 | 설명 |
 |------|------|

@@ -3,6 +3,7 @@ import type { LawApiClient } from "../lib/api-client.js";
 import { truncateResponse } from "../lib/schemas.js";
 import { parseSearchXML, extractTag } from "../lib/xml-parser.js";
 import { formatToolError } from "../lib/errors.js";
+import { buildNoResultHint } from "../lib/search-hints.js";
 
 // Customs legal interpretation search tool - Search for customs law interpretations
 export const searchCustomsInterpretationsSchema = z.object({
@@ -62,10 +63,8 @@ export async function searchCustomsInterpretations(
 
     if (totalCount === 0) {
       return {
-        content: [{
-          type: "text",
-          text: "검색 결과가 없습니다."
-        }]
+        content: [{ type: "text", text: buildNoResultHint({ query: args.query || "", toolName: "search_customs_interpretations", alternatives: ["search_interpretations"] }) }],
+        isError: true
       };
     }
 

@@ -1,6 +1,6 @@
 # Korean Law MCP - System Architecture
 
-> **v2.3.2** | Last Updated: April 2026
+> **v3.1.2** | Last Updated: April 2026
 
 ---
 
@@ -14,19 +14,19 @@
             (Local Desktop)        (Remote: Fly.io)
                      │                    │
 ┌────────────────────▼────────────────────▼────────────────────┐
-│               Korean Law MCP Server (v2.3.2)                  │
+│               Korean Law MCP Server (v3.1.2)                  │
 │                                                               │
 │  ┌───────────────────────────────────────────────────────┐   │
-│  │     Tool Registry (89 Zod-Validated Tools)            │   │
+│  │     Tool Registry (91 Zod-Validated Tools)            │   │
 │  │         tool-registry.ts → allTools[]                 │   │
 │  ├───────────────────────────────────────────────────────┤   │
-│  │  검색 (11)   │ 조회 (9)      │ 분석 (9)              │   │
-│  │  전문 (4)    │ 헌재/행심 (6) │ 지식베이스 (7)        │   │
-│  │  기타 (4)    │ 체인 (7)      │ CLI 인터페이스        │   │
+│  │  검색 (11)   │ 조회 (9)      │ 분석 (10)             │   │
+│  │  전문 (4)    │ 헌재/행심 (8) │ 지식베이스 (7)        │   │
+│  │  기타 (7)    │ 체인 (8)      │ CLI 인터페이스        │   │
 │  └───────────────────────────────────────────────────────┘   │
 │                             ▲                                 │
 │  ┌───────────────────────────────────────────────────────┐   │
-│  │            Shared Libraries (src/lib/ 13개)           │   │
+│  │            Shared Libraries (src/lib/ 22개)           │   │
 │  ├───────────────────────────────────────────────────────┤   │
 │  │  • api-client.ts       (API 호출 + 캐시)              │   │
 │  │  • xml-parser.ts       (6개 도메인 파서)              │   │
@@ -38,6 +38,10 @@
 │  │  • fetch-with-retry.ts (30s timeout, 3 retries)       │   │
 │  │  • session-state.ts    (멀티세션 API 키 격리)          │   │
 │  │  • cache.ts            (LRU + TTL)                    │   │
+│  │  • search-hints.ts     (검색 결과 없음 힌트 생성)      │   │
+│  │  • query-router.ts     (자연어 → 도구 라우팅)          │   │
+│  │  • tool-profiles.ts    (도구 카테고리 매핑)             │   │
+│  │  • 외 8개 유틸리티 모듈                                 │   │
 │  └───────────────────────────────────────────────────────┘   │
 │                             ▲                                 │
 │  ┌───────────────────────────────────────────────────────┐   │
@@ -61,7 +65,7 @@
 
 1. **Separation of Concerns**: Tools → Shared Libs → API Client
 2. **Single Responsibility**: 파일당 200줄 미만, 단일 기능
-3. **Centralized Tool Registry**: 64개 도구를 `tool-registry.ts`의 `allTools[]`에 등록
+3. **Centralized Tool Registry**: 91개 도구를 `tool-registry.ts`의 `allTools[]`에 등록 (14개만 노출)
 4. **Type Safety**: TypeScript strict mode + Zod validation
 5. **Session Isolation**: 멀티세션 API 키 격리 (race condition 방지)
 6. **Network Resilience**: 30s timeout, 3 retries with exponential backoff
@@ -75,7 +79,7 @@
 
 - MCP 서버 초기화
 - CLI 인자 파싱 (`--mode stdio|sse|http`, `--port`)
-- `registerTools(server, apiClient)` 호출로 64개 도구 일괄 등록
+- `registerTools(server, apiClient)` 호출로 91개 도구 일괄 등록 (14개만 노출)
 
 ### Tool Registry (`src/tool-registry.ts`)
 
@@ -86,7 +90,7 @@
 
 ### CLI (`src/cli.ts`)
 
-- `korean-law <tool> --param value` 형태로 64개 도구 직접 실행
+- `korean-law <tool> --param value` 형태로 91개 도구 직접 실행
 - `korean-law list [--category ...]`: 도구 목록/카테고리 필터
 - `korean-law help <tool>`: 도구 상세 파라미터
 - `--json-input`: JSON으로 복합 파라미터 전달
@@ -211,6 +215,6 @@ docker run -e LAW_OC=your-key -p 3000:3000 korean-law-mcp
 
 ## Related Docs
 
-- [API.md](API.md) - 64개 도구 레퍼런스
+- [API.md](API.md) - 91개 도구 레퍼런스
 - [DEVELOPMENT.md](DEVELOPMENT.md) - 개발자 가이드
 - [README.md](../README.md) - 시작 가이드

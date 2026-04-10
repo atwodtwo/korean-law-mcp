@@ -9,7 +9,7 @@ src/
 ├── index.ts              # 엔트리포인트 (STDIO/HTTP 모드)
 ├── cli.ts                # CLI v2.0 (자연어 라우팅 + REPL)
 ├── tool-registry.ts      # 91개 도구 등록, V3_EXPOSED 14개만 노출
-├��─ tools/                # 도구 구현 (46개 파일, 각 200줄 미만)
+├��─ tools/                # 도구 구현 (49개 파일, 각 200줄 미만)
 ├── lib/
 │   ├── api-client.ts     # API 클라이언트 (throwIfError/checkHtmlError 통일)
 │   ├── query-router.ts   # 자연어 → 도구 라우팅 엔진
@@ -30,6 +30,9 @@ src/
 │   ├── risk-rules.ts     # 문서 분석 리스크 규칙
 │   ├── date-parser.ts    # 자연어 날짜 파서
 │   ├── document-analysis.ts  # 문서유형 분류/금액추출/리스크 탐지
+│   ├── search-hints.ts   # 검색 결과 없음 힌트 생성 (buildNoResultHint)
+│   ├── tool-chain-config.ts  # 체인 도구 설정
+│   ├── committee-decisions-impl.ts  # 위원회 결정문 공유 구현
 │   └── types.ts          # 공통 타입
 └── server/               # HTTP 서버 (Express)
     └── http-server.ts    # Streamable HTTP (MCP 표준, 100kb body limit, MAX_SESSIONS=100)
@@ -122,6 +125,7 @@ get_law_text(mst, jo="006300") → 제63조(휴직) 조회
 | `lib/tool-profiles.ts` | 도구 카테고리 매핑 (discover_tools용) |
 | `tools/meta-tools.ts` | discover_tools + execute_tool (전문 도구 접근) |
 | `lib/article-parser.ts` | 조문 파서 (cleanHtml, extractHangContent) |
+| `lib/search-hints.ts` | 검색 결과 없음 힌트 생성 (17개 도구에서 사용) |
 
 ## Docs
 

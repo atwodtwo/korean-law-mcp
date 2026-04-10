@@ -3,6 +3,7 @@ import type { LawApiClient } from "../lib/api-client.js";
 import { truncateResponse } from "../lib/schemas.js";
 import { parseSearchXML, extractTag } from "../lib/xml-parser.js";
 import { formatToolError } from "../lib/errors.js";
+import { buildNoResultHint } from "../lib/search-hints.js";
 
 // Legal terms search tool - Search for legal terminology definitions
 export const searchLegalTermsSchema = z.object({
@@ -47,13 +48,8 @@ export async function searchLegalTerms(
     const totalCount = totalCnt;
 
     if (totalCount === 0) {
-      let errorMsg = "검색 결과가 없습니다.";
-
       return {
-        content: [{
-          type: "text",
-          text: errorMsg
-        }],
+        content: [{ type: "text", text: buildNoResultHint({ query: args.query, toolName: "search_legal_terms" }) }],
         isError: true
       };
     }
