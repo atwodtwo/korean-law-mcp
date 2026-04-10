@@ -1,6 +1,6 @@
 # Korean Law MCP - 개발자 가이드
 
-> **v2.3.2** | 기여자를 위한 개발 가이드
+> **v3.1.2** | 기여자를 위한 개발 가이드
 
 ---
 
@@ -35,8 +35,8 @@ korean-law-mcp/
 ├── src/
 │   ├── index.ts              # MCP 서버 진입점 (STDIO/HTTP 모드)
 │   ├── cli.ts                # CLI 인터페이스
-│   ├── tool-registry.ts      # 64개 도구 등록 (allTools 배열)
-│   ├── lib/                  # 공통 라이브러리 (13개 파일)
+│   ├── tool-registry.ts      # 91개 도구 등록 (allTools 배열, 14개만 노출)
+│   ├── lib/                  # 공통 라이브러리 (22개 파일)
 │   │   ├── api-client.ts     # API 클라이언트
 │   │   ├── annex-file-parser.ts  # HWPX/HWP/PDF 별표 파싱
 │   │   ├── article-parser.ts # 조문 파서
@@ -49,15 +49,25 @@ korean-law-mcp/
 │   │   ├── session-state.ts  # 멀티세션 API 키 격리
 │   │   ├── three-tier-parser.ts  # 3단 비교 파서
 │   │   ├── types.ts          # 공통 타입
-│   │   └── xml-parser.ts     # 6개 도메인별 XML 파서
-│   ├── tools/                # 도구 구현 (40개 파일)
+│   │   ├── xml-parser.ts     # 6개 도메인별 XML 파서
+│   │   ├── query-router.ts   # 자연어 → 도구 라우팅 엔진
+│   │   ├── tool-profiles.ts  # 도구 카테고리 매핑
+│   │   ├── cli-format.ts     # CLI 출력 포맷팅
+│   │   ├── cli-executor.ts   # CLI 쿼리 실행 엔진
+│   │   ├── risk-rules.ts     # 문서 분석 리스크 규칙
+│   │   ├── date-parser.ts    # 자연어 날짜 파서
+│   │   ├── document-analysis.ts  # 문서유형 분류/리스크 탐지
+│   │   ├── search-hints.ts   # 검색 결과 없음 힌트 (buildNoResultHint)
+│   │   ├── tool-chain-config.ts  # 체인 도구 설정
+│   │   └── committee-decisions-impl.ts  # 위원회 결정문 공유 구현
+│   ├── tools/                # 도구 구현 (49개 파일)
 │   │   ├── search.ts         # search_law
 │   │   ├── law-text.ts       # get_law_text
 │   │   ├── admin-rule.ts     # search_admin_rule, get_admin_rule
 │   │   ├── ordinance-search.ts / ordinance.ts  # 자치법규
 │   │   ├── precedents.ts     # search_precedents, get_precedent_text
 │   │   ├── interpretations.ts  # 법령해석례
-│   │   ├── chains.ts         # 7개 체인 도구
+│   │   ├── chains.ts         # 8개 체인 도구
 │   │   ├── batch-articles.ts # get_batch_articles
 │   │   ├── annex.ts          # get_annexes (별표 조회+파싱)
 │   │   ├── committee-decisions.ts  # 공정위/노동위/개보위
