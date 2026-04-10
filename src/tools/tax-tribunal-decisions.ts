@@ -3,6 +3,7 @@ import type { LawApiClient } from "../lib/api-client.js";
 import { parseTaxTribunalXML } from "../lib/xml-parser.js";
 import { truncateResponse } from "../lib/schemas.js";
 import { formatToolError } from "../lib/errors.js";
+import { buildNoResultHint } from "../lib/search-hints.js";
 
 // Tax tribunal decision search tool - Search for special administrative appeals decisions
 export const searchTaxTribunalDecisionsSchema = z.object({
@@ -51,10 +52,8 @@ export async function searchTaxTribunalDecisions(
 
     if (totalCount === 0) {
       return {
-        content: [{
-          type: "text",
-          text: "검색 결과가 없습니다."
-        }]
+        content: [{ type: "text", text: buildNoResultHint({ query: args.query || "", toolName: "search_tax_tribunal_decisions", alternatives: ["search_precedents", "search_interpretations"] }) }],
+        isError: true
       };
     }
 

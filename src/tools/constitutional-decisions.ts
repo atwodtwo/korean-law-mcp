@@ -3,6 +3,7 @@ import type { LawApiClient } from "../lib/api-client.js";
 import { parseConstitutionalXML } from "../lib/xml-parser.js";
 import { truncateResponse } from "../lib/schemas.js";
 import { formatToolError } from "../lib/errors.js";
+import { buildNoResultHint } from "../lib/search-hints.js";
 
 // Constitutional Court decision search tool - Search for Constitutional Court rulings
 export const searchConstitutionalDecisionsSchema = z.object({
@@ -44,13 +45,8 @@ export async function searchConstitutionalDecisions(
     const decisions = result.items;
 
     if (totalCount === 0) {
-      let errorMsg = "검색 결과가 없습니다.";
-
       return {
-        content: [{
-          type: "text",
-          text: errorMsg
-        }],
+        content: [{ type: "text", text: buildNoResultHint({ query: args.query || "", toolName: "search_constitutional_decisions", alternatives: ["search_precedents"] }) }],
         isError: true
       };
     }

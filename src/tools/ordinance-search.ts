@@ -8,6 +8,7 @@ import { normalizeLawSearchText, expandOrdinanceQuery } from "../lib/search-norm
 import { parseSearchXML, extractTag } from "../lib/xml-parser.js"
 import { truncateResponse } from "../lib/schemas.js"
 import { formatToolError } from "../lib/errors.js"
+import { buildNoResultHint } from "../lib/search-hints.js"
 
 export const SearchOrdinanceSchema = z.object({
   query: z.string().describe("검색할 자치법규명 (예: '서울', '환경')"),
@@ -85,11 +86,12 @@ export async function searchOrdinance(
       // 확장 검색도 실패한 경우, 시도한 쿼리들 안내
       const { expanded } = expandOrdinanceQuery(input.query)
       const triedQueries = [normalizedQuery, ...expanded].slice(0, 3).join("', '")
+      const base = `'${input.query}' 검색 결과가 없습니다.\n\n시도한 검색어: '${triedQueries}'`
+      const hint = buildNoResultHint({ query: input.query, toolName: "search_ordinance", alternatives: ["search_law"] })
+      const combined = base + "\n\n" + hint.replace(/^검색 결과가 없습니다\.\n?/, "")
       return {
-        content: [{
-          type: "text",
-          text: `'${input.query}' 검색 결과가 없습니다.\n\n시도한 검색어: '${triedQueries}'`
-        }]
+        content: [{ type: "text", text: combined }],
+        isError: true
       }
     }
 

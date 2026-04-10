@@ -3,6 +3,7 @@ import type { LawApiClient } from "../lib/api-client.js"
 import { parseTreatyXML } from "../lib/xml-parser.js"
 import { truncateResponse } from "../lib/schemas.js"
 import { formatToolError } from "../lib/errors.js"
+import { buildNoResultHint } from "../lib/search-hints.js"
 
 export const searchTreatiesSchema = z.object({
   query: z.string().optional().describe("검색 키워드 (예: '투자보장', '범죄인인도')"),
@@ -46,13 +47,7 @@ export async function searchTreaties(
     const treaties = result.items
 
     if (result.totalCnt === 0) {
-      const kw = args.query || "관련 키워드"
-      const hint = [
-        "검색 결과가 없습니다.\n\n개선 방법:",
-        `  1. 단순 키워드: search_treaties(query="${kw.split(/\s+/)[0]}")`,
-        `  2. 법령 검색: search_law(query="${kw}")`,
-      ].join("\n")
-      return { content: [{ type: "text", text: hint }], isError: true }
+      return { content: [{ type: "text", text: buildNoResultHint({ query: args.query || "", toolName: "search_treaties", alternatives: ["search_law"] }) }], isError: true }
     }
 
     let output = `조약 검색 결과 (총 ${result.totalCnt}건, ${result.page}페이지):\n\n`

@@ -3,6 +3,7 @@ import type { LawApiClient } from "../lib/api-client.js"
 import { parsePrecedentXML } from "../lib/xml-parser.js"
 import { truncateResponse } from "../lib/schemas.js"
 import { formatToolError } from "../lib/errors.js"
+import { buildNoResultHint } from "../lib/search-hints.js"
 
 export const searchPrecedentsSchema = z.object({
   query: z.string().optional().describe("검색 키워드 (예: '자동차', '담보권')"),
@@ -58,9 +59,7 @@ export async function searchPrecedents(
   const totalCount = (args.fromDate || args.toDate) ? precs.length : result.totalCnt;
 
   if (totalCount === 0) {
-    const kw = args.query || "관련 키워드"
-    const hint = `검색 결과가 없습니다.\n제안:\n  1. 단순 키워드: search_precedents(query="${kw.split(/\s+/)[0]}")\n  2. 해석례 검색: search_interpretations(query="${kw}")\n  3. 법령 검색: search_law(query="${kw}")`
-    return { content: [{ type: "text", text: hint }], isError: true };
+    return { content: [{ type: "text", text: buildNoResultHint({ query: args.query || "", toolName: "search_precedents", alternatives: ["search_interpretations", "search_law"] }) }], isError: true };
   }
 
   let output = `판례 검색 결과 (총 ${totalCount}건, ${currentPage}페이지)`;

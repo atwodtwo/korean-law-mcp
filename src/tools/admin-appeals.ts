@@ -3,6 +3,7 @@ import type { LawApiClient } from "../lib/api-client.js"
 import { parseAdminAppealXML as parseAdminAppealXMLShared } from "../lib/xml-parser.js"
 import { truncateResponse } from "../lib/schemas.js"
 import { formatToolError } from "../lib/errors.js"
+import { buildNoResultHint } from "../lib/search-hints.js"
 
 // Administrative appeal decision search tool - Search for administrative tribunal rulings
 export const searchAdminAppealsSchema = z.object({
@@ -42,13 +43,8 @@ export async function searchAdminAppeals(
     const appeals = result.items;
 
     if (totalCount === 0) {
-      let errorMsg = "검색 결과가 없습니다.";
-
       return {
-        content: [{
-          type: "text",
-          text: errorMsg
-        }],
+        content: [{ type: "text", text: buildNoResultHint({ query: args.query || "", toolName: "search_admin_appeals", alternatives: ["search_precedents"] }) }],
         isError: true
       };
     }

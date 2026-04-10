@@ -3,6 +3,7 @@ import type { LawApiClient } from "../lib/api-client.js";
 import { extractTag, parseSearchXML } from "../lib/xml-parser.js";
 import { truncateResponse } from "../lib/schemas.js";
 import { formatToolError } from "../lib/errors.js";
+import { buildNoResultHint } from "../lib/search-hints.js";
 
 // ========================================
 // Common helpers
@@ -77,7 +78,7 @@ async function searchRules(
 
     if (result.totalCnt === 0) {
       return {
-        content: [{ type: "text", text: `${cfg.label} 검색 결과가 없습니다. 다른 키워드를 시도하세요.` }],
+        content: [{ type: "text", text: buildNoResultHint({ query: args.query, toolName: textToolName, alternatives: ["search_admin_rule"] }) }],
         isError: true,
       };
     }
